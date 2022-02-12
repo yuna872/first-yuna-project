@@ -1,0 +1,214 @@
+  <!doctype html>
+    <html lang="en">
+
+    <head>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+              integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+        <!-- Optional JavaScript -->
+        <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+                integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+                crossorigin="anonymous"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+                integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+                crossorigin="anonymous"></script>
+
+        <title>스파르타 코딩클럽 마지막 과제~!</title>
+
+        <meta property="og:title" content="원페이지 쇼핑몰"/>
+        <meta property="og:description" content="유나의 첫 웹서비스 v^^v"/>
+        <meta property="og:image" content="{{ url_for('static', filename='ogimage.jpeg') }}"/>
+
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&display=swap" rel="stylesheet">
+
+        <style>
+            * { /*전체 폰트 설정*/
+                font-family: 'Nanum Pen Script', cursive;
+            }
+
+            .item-image { /* 이미지 */
+                width: 500px;
+                height: 300px;
+
+                background-image: url(https://dimg.donga.com/a/660/0/90/5/ugc/CDB/29STREET/Article/5f/a4/f6/b1/5fa4f6b114f6d2738de6.png);
+                background-size: cover;
+                background-position: center;
+
+                margin-top: 20px;
+                margin-bottom: 20px;
+            }
+
+            .item-desc { /*상품 설명*/
+                width: 500px;
+            }
+
+            .input-group {
+                width: 500px;
+
+            }
+
+            .btn-order {
+                margin: auto;
+                width: 100px;
+                display: block;
+
+                margin-bottom: 40px;
+            }
+
+            .price { /*가격 표시*/
+                font-size: 20px;
+            }
+
+            .rate {
+                color: blue;
+            }
+
+            .wrap {
+                width: 500px;
+                margin: 100px auto 100px auto;
+            }
+        </style>
+
+        <script>
+
+            $(document).ready(function () {
+                q1();
+                showOrders();
+            });
+
+            var patternPhone =  /^\d{3}-\d{3,4}-\d{4}$/;
+
+            function order() {
+                let name = $('#name').val()
+                let number= $('#inputGroupSelect01').val()
+                let address = $('#address').val()
+                let phone = $('#phone').val()
+
+                if(name == ''){alert('이름을 입력하세요!')}
+                else if(number == '---수량을 선택하세요---'){alert('수량을 선택하세요!')}
+                else if(address == ''){alert('주소를 입력하세요!')}
+                else if(phone == ''){alert('전화번호를 입력하세요')}
+                else if(!patternPhone.test(phone)){alert('전화번호는 @@@-@@@@-@@@@ 형식으로 입력해주세요!')}
+                else{
+                  $.ajax({
+                    type: "POST",
+                    url: "/order",
+                    data: {name_give:name,number_give:number,address_give:address,phone_give:phone},
+                    success: function (response) { // 성공하면
+                        alert(response["msg"]);
+                        window.location.reload()
+                    }
+                })
+
+            }}
+
+            function showOrders() {
+                $.ajax({
+                    type: "GET",
+                    url: "/order",
+                    data: {},
+                    success: function (response) {
+                        let orders = response['all_orders']
+
+                        for(let i =0; i < orders.length; i++){
+                            let name = orders[i]['name']
+                            let number = orders[i]['number']
+                            let address = orders[i]['address']
+                            let phone = orders[i]['phone']
+
+                            let temp_html = `<tr>
+                                            <th scope="row">${name}</th>
+                                            <td>${number}</td>
+                                            <td>${address}</td>
+                                            <td>${phone}</td>
+                                        </tr>`
+
+                            $('#order-table').append(temp_html)
+                        }
+                    }
+                })
+            }
+            function q1() {
+                $.ajax({
+                    type: "GET",
+                    url: "https://api.manana.kr/exchange/rate.json",
+                    data: {},
+                    success: function (response) {
+                        let now_rate = response[1]['rate']
+                        $('#now-rate').text(now_rate);
+                    }
+                })
+            }
+
+        </script>
+    </head>
+
+    <body>
+    <div class="wrap">
+
+        <div class="item-image"></div>
+
+        <div class="item-desc">
+            <h2>밀카 어드벤트 캘린더를 팔아요<span class="price"> 가격:10,000원/개</span></h2>
+            <p>크리스마스를 기다리는 그 시간을 조금이나마 덜 더디게 보내게 해 줄 아이템을 가져왔다. 바로 어드벤트 캘린더(advent calendar). 이탈리아에 킨더가 있다면 독일에 밀카(Milka)가
+                있다. 독일의 유명 초콜릿 브랜드 밀카의 어드벤트 캘린더에는 트리, 눈사람 등의 모양으로 된 초콜릿이 들어있다. 밀카의 부드럽고 진한 초콜릿 맛을 안다면 하루에 하나씩만 뜯기는 어려울 듯
+                하다.</p>
+            <p class="rate">달러-원 환율 : <span id="now-rate"></span></p>
+        </div>
+
+        <div class="input-group mb-3">
+            <div class="input-group-prepend">
+                <span class="input-group-text">주문자 이름</span>
+            </div>
+            <input type="text" class="form-control" aria-describedby="basic-addon1"  id = "name">
+        </div>
+        <div class="input-group mb-3">
+            <div class="input-group-prepend">
+                <label class="input-group-text" for="inputGroupSelect01">수량</label>
+            </div>
+            <select class="custom-select" id="inputGroupSelect01">
+                <option selected>---수량을 선택하세요---</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+            </select>
+        </div>
+        <div class="input-group mb-3">
+            <div class="input-group-prepend">
+                <span class="input-group-text" >주소</span>
+            </div>
+            <input type="text" class="form-control" aria-describedby="basic-addon1" id = "address">
+        </div>
+        <div class="input-group mb-3">
+            <div class="input-group-prepend">
+                <span class="input-group-text">전화번호</span>
+            </div>
+            <input type="text" class="form-control" aria-describedby="basic-addon1"  id = "phone">
+        </div>
+        <button type="button" class="btn btn-primary btn-order" onclick="order()">주문하기</button>
+
+        <table class="table" id ="order-table">
+            <thead>
+            <tr>
+                <th scope="col">주문자 이름</th>
+                <th scope="col">수량</th>
+                <th scope="col">주소</th>
+                <th scope="col">전화번호</th>
+            </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+    </body>
+
+  </html>
